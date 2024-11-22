@@ -4,193 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <title>Register Now</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f9f8f6;
-            margin: 0;
-            padding: 0;
-        }
 
-        /* Header Styles */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 50px;
-            background-color: #fff;
-            border-bottom: 2px solid #ddd;
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-        }
-
-        .logo-container h1 {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            margin: 0;
-        }
-
-        .logo-container img {
-            width: 24px;
-            /* Adjust size as needed */
-            height: 24px;
-            /* Adjust size as needed */
-            margin-left: 4px;
-            /* Minimal spacing */
-        }
-
-        header nav ul {
-            list-style: none;
-            display: flex;
-            margin: 0;
-            padding: 0;
-        }
-
-        header nav ul li {
-            margin: 0 15px;
-        }
-
-        header nav ul li a {
-            text-decoration: none;
-            color: #666;
-            font-weight: bold;
-            font-size: 16px;
-        }
-
-        header nav ul li a:hover {
-            color: #000;
-        }
-
-        /* Center content */
-        .register-container {
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-            margin: 40px auto;
-        }
-
-        h1 {
-            font-size: 32px;
-            color: #333;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="password"] {
-            width: 100%;
-            padding: 12px 15px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #fff;
-        }
-
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .checkbox-container input {
-            margin-right: 8px;
-        }
-
-        .checkbox-container a {
-            color: #000;
-            text-decoration: none;
-        }
-
-        .checkbox-container a:hover {
-            text-decoration: underline;
-        }
-
-        .signup-btn {
-            width: 100%;
-            padding: 12px;
-            background-color: #1f513f;
-            color: #fff;
-            font-size: 18px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .signup-btn:hover {
-            background-color: #14412e;
-        }
-
-        .separator {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 20px 0;
-            color: #ccc;
-        }
-
-        .separator::before,
-        .separator::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background-color: #ccc;
-            margin: 0 10px;
-        }
-
-        .social-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .social-buttons button {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 15px;
-            font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            cursor: pointer;
-            background-color: #fff;
-        }
-
-        .social-buttons button img {
-            width: 20px;
-        }
-
-        .social-buttons button:hover {
-            background-color: #f0f0f0;
-        }
-
-        .footer-text {
-            font-size: 14px;
-            color: #666;
-        }
-
-        .footer-text a {
-            color: #1f513f;
-            text-decoration: none;
-        }
-
-        .footer-text a:hover {
-            text-decoration: underline;
-        }
-    </style>
 </head>
 
 <body>
@@ -225,26 +41,20 @@
             <button type="submit" class="signup-btn">Signup</button>
         </form>
         <div class="separator">or</div>
-        <div class="social-buttons">
-            <button>
-                <img src="google-logo.png" alt="Google Logo">
+        <a href="/login">
+            <button type="button" class="login-with-google-btn">
                 Sign in with Google
             </button>
-            <button>
-                <img src="apple-logo.png" alt="Apple Logo">
-                Sign in with Apple
-            </button>
-        </div>
+        </a>
         <p class="footer-text">Have an account? <a href="#">Sign In</a></p>
     </div>
 
-    <h1>HydroBloom</h1>
-    <h2>Login</h2>
-    <a href="/login">
+
+    <!-- <a href="/login">
         <button type="button" class="login-with-google-btn">
             Sign in with Google
         </button>
-    </a>
+    </a> -->
 </body>
 
 </html>
