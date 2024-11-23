@@ -9,20 +9,24 @@ from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
+from .config import config
+from . import my_db
 
-# from . import my_db
 
-
+db = my_db.db
 app = Flask(__name__)
-app.secret_key = "My_Secret_Key_123!"
-alive = 0
-data = {}
+app.secret_key = config.get("APP_SECRET_KEY")
+
+app.config["SQLALCHEMY_DATABASE_URI"] = config.get("SQLALCHEMY_DATABASE_URI")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db.init_app(app)
 
 # google oauth id
-GOOGLE_CLIENT_ID = (
-    "34591040003-fieakfln2lppca3cn5mg5p3b8089balc.apps.googleusercontent.com"
+GOOGLE_CLIENT_ID = config.get("GOOGLE_CLIENT_ID")
+client_secrets_file = os.path.join(
+    pathlib.Path(__file__).parent, ".client_secrets.json"
 )
-client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_secrets.json")
 
 flow = Flow.from_client_secrets_file(
     client_secrets_file=client_secrets_file,
@@ -33,6 +37,9 @@ flow = Flow.from_client_secrets_file(
     ],
     redirect_uri="https://www.hydrabloom.online/callback",
 )
+
+# alive = 0
+# data = {}
 
 
 def login_is_required(function):
@@ -75,6 +82,7 @@ def callback():
     session["google_id"] = id_info.get("sub")
     print(session["google_id"])
     session["name"] = id_info.get("name")
+    print(session["name"])
     return redirect("/protected_area")
 
 
@@ -92,9 +100,14 @@ def index():
 @app.route("/protected_area")
 @login_is_required
 def protected_area():
-    # my_db.add_user_and_login(session["name"], session["google_id"])
-    return render_template("protected_area.html")
-    # return f"Hello {session["name"]} <a href='/logout'><button>Logout</button></a>"
+    my_db.add_user_and_login(session["name"], session["google_id"])
+    # return render_template("protected_area.html")
+    return render_template(
+        "protected_area.html",
+        user_id=session["google_id"],
+        google_admin_id=config.get("GOOGLE_ADMIN_ID"),
+        online_users=my_db.get_all_logged_in_users(),
+    )
 
 
 # register page Route
