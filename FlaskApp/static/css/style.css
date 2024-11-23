@@ -206,45 +206,7 @@ input[type="password"] {
 }
 
 /* this is register.html css*/
-.logo-container {
-    display: flex;
-    align-items: center;
-}
-
-.logo-container h1 {
-    font-size: 24px;
-    font-weight: bold;
-    color: #333;
-    margin: 0;
-}
-
-.logo-container img {
-    width: 24px; /* Adjust size as needed */
-    height: 24px; /* Adjust size as needed */
-    margin-left: 4px; /* Minimal spacing */
-}
-
-header nav ul {
-    list-style: none;
-    display: flex;
-    margin: 0;
-    padding: 0;
-}
-
-header nav ul li {
-    margin: 0 15px;
-}
-
-header nav ul li a {
-    text-decoration: none;
-    color: #666;
-    font-weight: bold;
-    font-size: 16px;
-}
-
-header nav ul li a:hover {
-    color: #000;
-}
+/*  */
 
 /* Main Content */
 .main-content {
