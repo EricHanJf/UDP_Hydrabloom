@@ -183,6 +183,7 @@ def addPlant():
             waterrequirement = request.form.get("waterrequirement")
             planttype = request.form.get("planttype")
             plantlocation = request.form.get("plantlocation")
+            gmail = request.form.get("gmail")
 
             # Validate required fields
             if (
@@ -190,6 +191,7 @@ def addPlant():
                 or not waterrequirement
                 or not planttype
                 or not plantlocation
+                or not gmail
             ):
                 flash("All fields are required.", "danger")
                 return redirect(url_for("index"))
@@ -200,6 +202,8 @@ def addPlant():
                 waterrequirement=waterrequirement,
                 planttype=planttype,
                 plantlocation=plantlocation,
+                user_id=session["google_id"],
+                gmail=gmail,
             )
 
             # Save the plant to the database
@@ -207,7 +211,7 @@ def addPlant():
             db.session.commit()
 
             flash("Plant added successfully!", "success")
-            return redirect(url_for("protected_area"))
+            return redirect(url_for("plants"))
 
         except Exception as e:
             # Log the error and notify the user
@@ -217,6 +221,7 @@ def addPlant():
     else:
         # Render the add plant page on GET request
         return render_template("addPlant.html")
+        # return render_template("protected_area.html")
 
 
 # Plants page route
@@ -224,8 +229,15 @@ def addPlant():
 @login_is_required
 def plants():
     try:
+        user_id = session["google_id"]
+        google_admin_id = config.get("GOOGLE_ADMIN_ID")
         # Fetch all plants from the database
-        all_plants = Plant.query.all()
+        if user_id == google_admin_id:
+            # Admin can see all plants
+            all_plants = Plant.query.all()
+        else:
+            # Normal users can only see their own plants
+            all_plants = Plant.query.filter_by(user_id=user_id).all()
 
         return render_template("plants.html", plants=all_plants)
 
