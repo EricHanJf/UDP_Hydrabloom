@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Admin Dashboard</title>
+</head>
+
+<body>
+    <header>
+        <div class="logo-container">
+            <h1>HydraBloom</h1>
+            <!-- Leaf Logo -->
+            <img src="images/image.jpg" alt="Leaf Logo">
+        </div>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="#">Plants</a></li>
+                <li><a href="{{ url_for('about') }}">About Us</a></li>
+                <li><a href="#">Vase</a></li>
+                <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+                <!-- <li>Hello {session["name"]}<a href='/logout'><button>Logout</button></a></li> -->
+                <!-- user name here and log out button -->
+            </ul>
+        </nav>
+    </header>
+    <div>
+        {% if user_id == google_admin_id %}
+        <h2>Logged in Users</h2>
+        <ul>
+            {% for user in online_users["users"] %}
+            <li>
+                <span>{{ user[0] }}</span>
+                <input type="checkbox" id="read-user-{{ user[1] }}" {% if user[2] %}checked{% endif %}>Read</input>
+                <input type="checkbox" id="write-user-{{ user[1] }}" {% if user[3] %}checked{% endif %}>Write</input>
+                <button id="access-user-{{ user[1] }}" onClick="grantAccess(this)">Grant Access</button>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</body>
+
+</html>
