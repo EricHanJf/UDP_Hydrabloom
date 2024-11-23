@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Plant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <header>
+        <div class="logo-container">
+            <h1>HydraBloom</h1>
+            <!-- Leaf Logo -->
+            <img src="{{ url_for('static', filename='images/image.jpg') }}" alt="Leaf Logo">
+        </div>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('plants') }}">Plants</a></li>
+                <li><a href="{{ url_for('about') }}">About Us</a></li>
+                <li><a href="#">Vase</a></li>
+                <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Add a New Plant</h1>
+        <form action="{{ url_for('addPlant') }}" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="plantname">Plant Name:</label>
+                <input type="text" id="plantname" name="plantname" required>
+            </div>
+
+            <div class="form-group">
+                <label for="waterrequirement">Water Requirement:</label>
+                <select id="waterrequirement" name="waterrequirement" required>
+                    <option value="Daily">Daily</option>
+                    <option value="Weekly">Weekly</option>
+                    <option value="Bi-Weekly">Bi-Weekly</option>
+                    <option value="Monthly">Monthly</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="planttype">Plant Type:</label>
+                <input type="text" id="planttype" name="planttype" placeholder="e.g., Succulent, Herb, Tree" required>
+            </div>
+
+            <div class="form-group">
+                <label for="plantlocation">Plant Location:</label>
+                <input type="text" id="plantlocation" name="plantlocation" placeholder="e.g., Living Room, Balcony"
+                    required>
+            </div>
+
+            <!-- <div class="form-group">
+                <label for="plantpicture">Plant Picture:</label>
+                <input type="file" id="plantpicture" name="plantpicture" accept="image/*">
+            </div> -->
+
+            <button type="submit">Add Plant</button>
+        </form>
+    </main>
+
+</body>
+
+</html>
