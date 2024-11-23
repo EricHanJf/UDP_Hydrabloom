@@ -4,14 +4,23 @@ import time
 import os
 import pathlib
 import requests
-from flask import Flask, session, abort, redirect, request, render_template, flash
+from flask import (
+    Flask,
+    session,
+    abort,
+    redirect,
+    request,
+    render_template,
+    flash,
+    url_for,
+)
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
 from .config import config
 from . import my_db
-
+from .my_db import Plant
 
 db = my_db.db
 app = Flask(__name__)
@@ -100,6 +109,7 @@ def index():
 @app.route("/protected_area")
 @login_is_required
 def protected_area():
+    print(session)
     my_db.add_user_and_login(session["name"], session["google_id"])
     # return render_template("protected_area.html")
     return render_template(
@@ -150,6 +160,78 @@ def admin_dashboard():
     except Exception as e:
         print(f"Error in admin_dashboard: {e}")
         return "An error occurred while loading the dashboard.", 500
+
+
+# UPLOAD_FOLDER = "static/uploads/plants"
+# ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+# app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+# # app.config = config.get("UPLOAD_FOLDER")
+
+
+# def allowed_file(filename):
+#     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+# @app.route("/addPlant", methods=["GET","POST"], endpoint="addPlant")
+@app.route("/addPlant", methods=["GET", "POST"], endpoint="addPlant")
+@login_is_required
+def addPlant():
+    if request.method == "POST":
+        try:
+            # Retrieve form data
+            plantname = request.form.get("plantname")
+            waterrequirement = request.form.get("waterrequirement")
+            planttype = request.form.get("planttype")
+            plantlocation = request.form.get("plantlocation")
+
+            # Validate required fields
+            if (
+                not plantname
+                or not waterrequirement
+                or not planttype
+                or not plantlocation
+            ):
+                flash("All fields are required.", "danger")
+                return redirect(url_for("index"))
+
+            # Create a new plant record (without plantpicture)
+            new_plant = Plant(
+                plantname=plantname,
+                waterrequirement=waterrequirement,
+                planttype=planttype,
+                plantlocation=plantlocation,
+            )
+
+            # Save the plant to the database
+            db.session.add(new_plant)
+            db.session.commit()
+
+            flash("Plant added successfully!", "success")
+            return redirect(url_for("protected_area"))
+
+        except Exception as e:
+            # Log the error and notify the user
+            app.logger.error(f"Error adding plant: {e}")
+            flash("An error occurred while adding the plant.", "danger")
+            return redirect(url_for("index"))
+    else:
+        # Render the add plant page on GET request
+        return render_template("addPlant.html")
+
+
+# Plants page route
+@app.route("/plants", endpoint="plants")
+@login_is_required
+def plants():
+    try:
+        # Fetch all plants from the database
+        all_plants = Plant.query.all()
+
+        return render_template("plants.html", plants=all_plants)
+
+    except Exception as e:
+        print(f"Error fetching plants: {e}")
+        return "An error occurred while fetching the plants.", 500
 
 
 # buzzer sensor code down there
