@@ -43,9 +43,11 @@
                 <th>Plant Type</th>
                 <th>Plant Location</th>
                 <th>Create Time</th>
+                <th>Gmail</th>
             </tr>
         </thead>
         <tbody>
+            {% if plants %}
             {% for plant in plants %}
             <tr>
                 <td>{{ plant.plantname }}</td>
@@ -53,8 +55,14 @@
                 <td>{{ plant.planttype }}</td>
                 <td>{{ plant.plantlocation }}</td>
                 <td>{{ plant.create_time }}</td>
+                <td>{{ plant.gmail }}</td>
             </tr>
             {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="5">No plants found.</td>
+            </tr>
+            {% endif %}
         </tbody>
     </table>
 </body>
