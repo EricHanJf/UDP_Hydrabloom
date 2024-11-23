@@ -128,6 +128,30 @@ def signin():
     return render_template("signin.html")
 
 
+# admin_dashboard page Route
+@app.route("/admin_dashboard", endpoint="admin_dashboard")
+@login_is_required
+def admin_dashboard():
+    try:
+        user_id = session.get("google_id")
+        user_name = session.get("name")
+        if not user_id or not user_name:
+            return redirect(url_for("signin"))
+
+        online_users = my_db.get_all_logged_in_users()
+        google_admin_id = config.get("GOOGLE_ADMIN_ID")
+
+        return render_template(
+            "admin_dashboard.html",
+            user_id=user_id,
+            google_admin_id=google_admin_id,
+            online_users=online_users,
+        )
+    except Exception as e:
+        print(f"Error in admin_dashboard: {e}")
+        return "An error occurred while loading the dashboard.", 500
+
+
 # buzzer sensor code down there
 def motion_detection():
     data["alarm"] = False
