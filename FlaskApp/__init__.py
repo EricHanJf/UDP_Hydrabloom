@@ -51,6 +51,7 @@ def login():
     session["state"] = state
     return redirect(authorization_url)
 
+
 # callback function
 @app.route("/callback")
 def callback():
@@ -96,9 +97,19 @@ def protected_area():
     # return f"Hello {session["name"]} <a href='/logout'><button>Logout</button></a>"
 
 
+# register page Route
+@app.route("/register")
+def register():
+    return render_template("register.html")
+
+
+# About page Route
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
 
 # buzzer sensor code down there
-
 def motion_detection():
     data["alarm"] = False
     while True:
