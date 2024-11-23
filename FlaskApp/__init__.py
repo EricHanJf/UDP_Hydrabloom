@@ -109,6 +109,12 @@ def about():
     return render_template("about.html")
 
 
+# Signin page Route
+@app.route("/signin")
+def signin():
+    return render_template("signin.html")
+
+
 # buzzer sensor code down there
 def motion_detection():
     data["alarm"] = False
