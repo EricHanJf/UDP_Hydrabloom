@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plants</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <header>
+        <div class="logo-container">
+            <h1>HydraBloom</h1>
+            <!-- Leaf Logo -->
+            <img src="images/image.jpg" alt="Leaf Logo">
+        </div>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('plants') }}">Plants</a></li>
+                <li><a href="{{ url_for('about') }}">About Us</a></li>
+                <li><a href="#">Vase</a></li>
+                <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+                <li>Hello, {{session["name"]}} <a href='/logout'><button>Logout</button></a></li>
+                <!-- <li>Hello {session["name"]}<a href='/logout'><button>Logout</button></a></li> -->
+                <!-- user name here and log out button -->
+            </ul>
+        </nav>
+    </header>
+    <h1>Plants</h1>
+
+    <div>
+        <a href="{{ url_for('addPlant') }}">Add a new plant</a>
+    </div>
+
+    <h3>List of Plants</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Plant Name</th>
+                <th>Water Requirement</th>
+                <th>Plant Type</th>
+                <th>Plant Location</th>
+                <th>Create Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for plant in plants %}
+            <tr>
+                <td>{{ plant.plantname }}</td>
+                <td>{{ plant.waterrequirement }}</td>
+                <td>{{ plant.planttype }}</td>
+                <td>{{ plant.plantlocation }}</td>
+                <td>{{ plant.create_time }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+
+</html>
