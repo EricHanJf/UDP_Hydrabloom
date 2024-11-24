@@ -1,7 +1,8 @@
 let aliveSecond = 0;
 let hearBeatRate = 5000;
 let pubnub;
-let appChannel = "xhanhan_pi_channel"
+// let appChannel = "xhanhan_pi_channel"
+let myChannel = "Hydrabloom_SD3_iot"
 
 
 function time() {
@@ -54,10 +55,10 @@ const setupPubNUb = () =>{
     pubnub = new pubnub({
         publishkey:'pub-c-18b517bb-ecb2-4940-badd-117a53aec456',
         subscribekey:'sub-c-7cb4f455-1d58-4487-81d5-460d437b7daf',
-        userId:"Xhanhan_Web_App",
+        userId:"hydrabloom_Web_App",
     })
     //creat a channel
-    const channer = pubnub.channel(appChannel);
+    const channer = pubnub.channel(myChannel);
     //create a subscription
     const subscription = channel.subscription();
 
@@ -77,7 +78,7 @@ const setupPubNUb = () =>{
 
 const publishMessage = async(message) =>{
     const publishPayload = {
-        channel:appChannel,
+        channel:myChannel,
         message:message,
     };
     await pubnub.publish(publishPayload)
