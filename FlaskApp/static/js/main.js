@@ -1,96 +1,183 @@
-let aliveSecond = 0;
-let hearBeatRate = 5000;
-let pubnub;
-// let appChannel = "xhanhan_pi_channel"
-let myChannel = "Hydrabloom_SD3_iot"
+// // let aliveSecond = 0;
+// // let hearBeatRate = 5000;
+// let pubnub;
+// let app_Channel = "Hydrabloom"
 
 
-function time() {
-    let d = new Date();
-    let currentSecond = d.getTime();
-    if (currentSecond - aliveSecond > hearBeatRate + 1000) {
-        document.getElementById("connection_id").innerHTML = "Dead";
-    } else {
-        document.getElementById("connection_id").innerHTML = "Alive";
-    }
-    setTimeout('time()', 1000);
-}
-function keepAlive() {
-    fetch('/keep_alive')
-        .then(response => {
-            if (response.ok) {
-                let date = new Date();
-                aliveSecond = date.getTime();
-                return response.json();
-            }
-            throw new Error("Server offline");
-        })
-        // .then(responseJson => {
-        //     if (responseJson.motion == 1) {
-        //         document.getElementById("motion_id").innerHTML = "Motion";
-        //     } else {
-        //         document.getElementById("motion_id").innerHTML = "No Motion";
-        //     }
-        // })
-        .catch(error => console.log(error));
-    setTimeout('keepAlive()', hearBeatRate);
+// // function time() {
+// //     let d = new Date();
+// //     let currentSecond = d.getTime();
+// //     if (currentSecond - aliveSecond > hearBeatRate + 1000) {
+// //         document.getElementById("connection_id").innerHTML = "Dead";
+// //     } else {
+// //         document.getElementById("connection_id").innerHTML = "Alive";
+// //     }
+// //     setTimeout('time()', 1000);
+// // }
+// // function keepAlive() {
+// //     fetch('/keep_alive')
+// //         .then(response => {
+// //             if (response.ok) {
+// //                 let date = new Date();
+// //                 aliveSecond = date.getTime();
+// //                 return response.json();
+// //             }
+// //             throw new Error("Server offline");
+// //         })
+// //         // .then(responseJson => {
+// //         //     if (responseJson.motion == 1) {
+// //         //         document.getElementById("motion_id").innerHTML = "Motion";
+// //         //     } else {
+// //         //         document.getElementById("motion_id").innerHTML = "No Motion";
+// //         //     }
+// //         // })
+// //         .catch(error => console.log(error));
+// //     setTimeout('keepAlive()', hearBeatRate);
 
-}
-function handleClick(cb) {
-    if (cb.checked) {
-        value = "on";
-    } else {
-        value = "off";
-    }
-    // sendEvent(cb.id + "-" + value);
-    publicMessage({"buzzer" : value})
-}
-// function sendEvent(value) {
-//     fetch('/status=' + value, {
-//         method: "POST"
-//     })
+// // }
+// function handleClick(cb) {
+//     if (cb.checked) {
+//         value = "on";
+//     } else {
+//         value = "off";
+//     }
+//     // sendEvent(cb.id + "-" + value);
+//     publicMessage({ "buzzer": value })
 // }
 
-const setupPubNUb = () =>{
-    pubnub = new pubnub({
-        publishkey:'pub-c-18b517bb-ecb2-4940-badd-117a53aec456',
-        subscribekey:'sub-c-7cb4f455-1d58-4487-81d5-460d437b7daf',
-        userId:"hydrabloom_Web_App",
-    })
-    //creat a channel
-    const channer = pubnub.channel(myChannel);
-    //create a subscription
-    const subscription = channel.subscription();
 
-    pubnub.addListener({
-        status:(s) =>{
-            console.log('Status',s.category);
-        },
-    })
+// const setupPubNUb = () => {
+//     pubnub = new pubnub({
+//         publishkey: 'pub-c-75d6d309-722b-419e-b589-e4f425b00fcb',
+//         subscribekey: 'sub-c-ccf0e37c-5f9b-4d4e-8455-af8f49720443',
+//         userId: "Hydrabloom",
+//     })
+//     //creat a channel
+//     const channer = pubnub.channel(app_Channel);
+//     //create a subscription
+//     const subscription = channel.subscription();
 
-    subscription.onMessage = (messageEvent) =>{
-        handleMessage(messageEvent.message);
+//     pubnub.addListener({
+//         status: (s) => {
+//             console.log('Status', s.category);
+//         },
+//     })
 
-    }
-    subscription.subscribe();
+//     subscription.onMessage = (messageEvent) => {
+//         handleMessage(messageEvent.message);
 
-};
+//     }
+//     subscription.subscribe();
 
-const publishMessage = async(message) =>{
-    const publishPayload = {
-        channel:myChannel,
-        message:message,
+// };
+
+// const publishMessage = async (message) => {
+//     const publishPayload = {
+//         channel: appChannel,
+//         message: message,
+//     };
+//     await pubnub.publish(publishPayload)
+// }
+
+// function handleMessage(message) {
+//     if (message == '"Motion":"Yes"') {
+//         document.getElementById("motion_id").innerHTML = "Yes";
+
+//     }
+//     if (message == '"Motion":"No"') {
+//         document.getElementById("motion_id").innerHTML = "No";
+
+//     }
+// }
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const ledOnButton = document.getElementById("ledOnButton");
+    const ledOffButton = document.getElementById("ledOffButton");
+    const statusElement = document.getElementById("status");
+
+    // Setup PubNub
+    let pubnub;
+
+    const setupPubNub = () => {
+        // Initialize PubNub
+        const pubnubConfig = {
+            publishKey: 'pub-c-75d6d309-722b-419e-b589-e4f425b00fcb',
+            subscribeKey: 'sub-c-ccf0e37c-5f9b-4d4e-8455-af8f49720443',
+            uuid: 'Hydrabloom'  // Unique identifier for the client
+        };
+
+        pubnub = new PubNub(pubnubConfig);
+
+        // Subscribe to the channel to listen for incoming messages
+        pubnub.subscribe({
+            channels: ['Hydrabloom'],
+            withPresence: true
+        });
+
+        // Set up listener for incoming messages
+        pubnub.addListener({
+            message: handleMessage,
+            status: function (statusEvent) {
+                console.log("PubNub status:", statusEvent);
+            }
+        });
     };
-    await pubnub.publish(publishPayload)
-} 
 
-function handleMessage(message){
-    if(message == '"Motion":"Yes"'){
-        document.getElementById("motion_id").innerHTML = "Yes";
+    // Handle the click event to publish messages to the PubNub channel
+    const handleClick = (action) => {
+        const message = {
+            command: action === "on" ? "LED_ON" : "LED_OFF"
+        };
+        publishMessage(message);
+    };
 
-    }
-    if(message == '"Motion":"No"'){
-        document.getElementById("motion_id").innerHTML = "No";
-        
-    }
-}
+    // Publish message to the PubNub channel
+    const publishMessage = (message) => {
+        pubnub.publish({
+            channel: 'Hydrabloom',  // Replace with your channel
+            message: message,
+            callback: function (response) {
+                console.log("Message sent:", response);
+                // Optionally, update the UI based on the response
+                updateStatus(`LED is ${message.led.toUpperCase()}`);
+            },
+            error: function (error) {
+                console.error("Error publishing message:", error);
+            }
+        });
+    };
+
+    // Handle messages received from PubNub
+    const handleMessage = (message) => {
+        console.log("Received message:", message);
+        const command = message.message.command;
+
+        // Update the status UI based on the action (ON/OFF)
+        if (command === 'LED_ON') {
+            updateStatus("LED is ON");
+        } else if (command === 'LED_OFF') {
+            updateStatus("LED is OFF");
+        } else {
+            console.log("Unknown command:", command);
+        }
+    };
+
+    // Update the UI with the current LED status
+    const updateStatus = (status) => {
+        statusElement.textContent = `Status: ${status}`;
+    };
+
+    // Initialize PubNub when the page is loaded
+    setupPubNub();
+
+    // Event listener for the "Turn ON LED" button
+    ledOnButton.addEventListener("click", () => {
+        handleClick("on");
+    });
+
+    // Event listener for the "Turn OFF LED" button
+    ledOffButton.addEventListener("click", () => {
+        handleClick("off");
+    });
+});
