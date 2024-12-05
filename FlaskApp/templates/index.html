@@ -14,12 +14,12 @@
         <div class="logo-container">
             <h1>HydraBloom</h1>
             <!-- Leaf Logo -->
-            <img src="images/image.jpg" alt="Leaf Logo">
+            <img src="{{ url_for('static', filename='images/image.jpg') }}" alt="Leaf Logo">
         </div>
         <nav>
             <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="#">About</a></li>
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('about') }}">About Us</a></li>
             </ul>
         </nav>
     </header>
@@ -29,10 +29,16 @@
         <div class="text-content">
             <h1>The World of Decorative Plants</h1>
             <p>Take care of your houseplants, and before you know it, your home will be a botanical paradise.</p>
-            <div class="buttons">
-                <a href="sign.html" class="login-btn">Login</a>
+            <!-- <div class="buttons">
+                <a href="{{ url_for('signin') }}" class="login-btn">Sign In</a>
                 <a href="{{ url_for('register') }}" class="register-btn">Register</a>
-            </div>
+                
+            </div> -->
+            <a href="/login">
+                <button type="button" class="login-with-google-btn">
+                    Sign in with Google
+                </button>
+            </a>
         </div>
         <div class="plant-details">
             <img src="https://png.pngtree.com/png-vector/20240207/ourmid/pngtree-indoor-plant-flowerpot-png-image_11669796.png"
