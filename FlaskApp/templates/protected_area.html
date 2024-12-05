@@ -13,40 +13,37 @@
 <header>
     <div class="logo-container">
         <h1>HydraBloom</h1>
-        <!-- Leaf Logo -->
-        <img src="images/image.jpg" alt="Leaf Logo">
+        <img src="{{ url_for('static', filename='images/image.jpg') }}" alt="Leaf Logo">
     </div>
     <nav>
         <ul>
             <li><a href="{{ url_for('index') }}">Home</a></li>
-            <li><a href="#">Plants</a></li>
-            <li><a href="#">About Us</a></li>
-            <li><a href="#">Vase</a></li>
-            <!-- <li>Hello {session["name"]}<a href='/logout'><button>Logout</button></a></li> -->
-            <!-- user name here and log out button -->
+            <li><a href="{{ url_for('plants') }}">Plants</a></li>
+            <li><a href="{{ url_for('about') }}">About Us</a></li>
+            <li><a href="{{ url_for('vase') }}">Vase</a></li>
+            <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+            <li>Hello, {{session["name"]}} <a href='/logout'><button>Logout</button></a></li>
         </ul>
     </nav>
 </header>
 
-<body onload="keepAlive(); time(); setupPubNub();">
-    <p>Hello {session["name"]}</p> <a href='/logout'><button>Logout</button></a>
-    <h1>Sensors</h1>
-    <h3>Connection: <span id="connection_id">...</span></h3>
-    <h3>Motion: <span id="connection_id">...</span></h3>
-    <input type="checkbox" id="buzzer" onclick="handleClick(this);">
-    <label for="buzzer">Buzzer On</label>
+<!-- <p>Hello {{session["name"]}}</p> -->
 
-    <div>
-        <a href="{{ url_for('addPlant') }}">add a new plant</a>
+<body onload="setupPubNub();updateTimeAndDayNight();">
+    <p class=welcome-user-message>Welcome to Hydrambloom, Hello {{session["name"]}}</p>
+    <div class="time-container">
+        <h2>Current Time: <span id="currentTime"></span></h2>
+        <h2>Currently: <span id="dayOrNight"></span></h2>
     </div>
 
-    <h1>LED Control</h1>
-    <button id="ledOnButton" class="button">Turn ON LED</button>
-    <button id="ledOffButton" class="button">Turn OFF LED</button>
-    <p id="status">Status: LED is OFF</p>
+    <h1>Sensor Data</h1>
 
-
-
+    <p>Temperature: <span class="temperature"></span></p>
+    <p>Humidity: <span class="humidity"></span></p>
+    <p>Lux: <span class="lux"></span></p>
+    <div class="link-container">
+        <a class="add-plant-link" href="{{ url_for('addPlant') }}">+</a>
+    </div>
 </body>
 
 </html>
