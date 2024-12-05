@@ -32,14 +32,16 @@ class Plant(db.Model):
     planttype = db.Column(db.String(100))  # Type of the plant
     plantlocation = db.Column(db.String(255))  # Location of the plant
     create_time = db.Column(db.DateTime, default=datetime.utcnow)  # Timestamp
-    # plantpicture = db.Column(db.String(255))
+    plantpicture = db.Column(db.String(255))  # Path to the plant picture
 
-    def __init__(self, plantname, waterrequirement, planttype, plantlocation):
+    def __init__(
+        self, plantname, waterrequirement, planttype, plantlocation, plantpicture=None
+    ):
         self.plantname = plantname
         self.waterrequirement = waterrequirement
         self.planttype = planttype
         self.plantlocation = plantlocation
-        # self.plantpicture = plantpicture
+        self.plantpicture = plantpicture
 
 
 def delete_all():
