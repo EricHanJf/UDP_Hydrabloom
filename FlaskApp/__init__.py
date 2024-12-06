@@ -21,6 +21,8 @@ import google.auth.transport.requests
 from .config import config
 from . import my_db
 from .my_db import Plant
+from werkzeug.utils import secure_filename
+
 
 db = my_db.db
 app = Flask(__name__)
@@ -30,6 +32,8 @@ app.config["SQLALCHEMY_DATABASE_URI"] = config.get("SQLALCHEMY_DATABASE_URI")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
+
+#
 
 # google oauth id
 GOOGLE_CLIENT_ID = config.get("GOOGLE_CLIENT_ID")
@@ -138,6 +142,20 @@ def signin():
     return render_template("signin.html")
 
 
+# vase page Route
+# @app.route("/vase", methods=["GET"], endpoint="vase")
+# @login_is_required
+# def vase():
+#     return render_template("vase.html")
+
+
+@app.route("/vase", methods=["GET"], endpoint="vase")
+@login_is_required
+def vase():
+    plantpicture = request.args.get("plantpicture")
+    return render_template("vase.html", plantpicture=plantpicture)
+
+
 # admin_dashboard page Route
 @app.route("/admin_dashboard", endpoint="admin_dashboard")
 @login_is_required
@@ -145,11 +163,13 @@ def admin_dashboard():
     try:
         user_id = session.get("google_id")
         user_name = session.get("name")
-        if not user_id or not user_name:
+        google_admin_id = config.get("GOOGLE_ADMIN_ID")
+
+        if not user_id or not user_name or user_id != google_admin_id:
             return redirect(url_for("signin"))
 
         online_users = my_db.get_all_logged_in_users()
-        google_admin_id = config.get("GOOGLE_ADMIN_ID")
+        # google_admin_id = config.get("GOOGLE_ADMIN_ID")
 
         return render_template(
             "admin_dashboard.html",
@@ -173,6 +193,65 @@ def admin_dashboard():
 
 
 # @app.route("/addPlant", methods=["GET","POST"], endpoint="addPlant")
+# @app.route("/addPlant", methods=["GET", "POST"], endpoint="addPlant")
+# @login_is_required
+# def addPlant():
+#     if request.method == "POST":
+#         try:
+#             # Retrieve form data
+#             plantname = request.form.get("plantname")
+#             waterrequirement = request.form.get("waterrequirement")
+#             planttype = request.form.get("planttype")
+#             plantlocation = request.form.get("plantlocation")
+#             gmail = request.form.get("gmail")
+
+#             # Validate required fields
+#             if (
+#                 not plantname
+#                 or not waterrequirement
+#                 or not planttype
+#                 or not plantlocation
+#                 or not gmail
+#             ):
+#                 flash("All fields are required.", "danger")
+#                 return redirect(url_for("index"))
+
+#             # Create a new plant record (without plantpicture)
+#             new_plant = Plant(
+#                 plantname=plantname,
+#                 waterrequirement=waterrequirement,
+#                 planttype=planttype,
+#                 plantlocation=plantlocation,
+#                 user_id=session["google_id"],
+#                 gmail=gmail,
+#             )
+
+#             # Save the plant to the database
+#             db.session.add(new_plant)
+#             db.session.commit()
+
+#             flash("Plant added successfully!", "success")
+#             return redirect(url_for("plants"))
+
+
+#         except Exception as e:
+#             # Log the error and notify the user
+#             app.logger.error(f"Error adding plant: {e}")
+#             flash("An error occurred while adding the plant.", "danger")
+#             return redirect(url_for("index"))
+#     else:
+#         # Render the add plant page on GET request
+#         return render_template("addPlant.html")
+#         # return render_template("protected_area.html")
+def allowed_file(filename):
+    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+UPLOAD_FOLDER = "var/www/FlaskApp/FlaskApp/static/uploads/plants"
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+
 @app.route("/addPlant", methods=["GET", "POST"], endpoint="addPlant")
 @login_is_required
 def addPlant():
@@ -184,19 +263,22 @@ def addPlant():
             planttype = request.form.get("planttype")
             plantlocation = request.form.get("plantlocation")
             gmail = request.form.get("gmail")
+            plantpicture = request.files.get("plantpicture")  # Get the uploaded file
 
             # Validate required fields
-            if (
-                not plantname
-                or not waterrequirement
-                or not planttype
-                or not plantlocation
-                or not gmail
-            ):
+            if not all([plantname, waterrequirement, planttype, plantlocation, gmail]):
                 flash("All fields are required.", "danger")
-                return redirect(url_for("index"))
+                return redirect(url_for("addPlant"))
 
-            # Create a new plant record (without plantpicture)
+            plantpicture_path = None
+            # Process image file if provided
+            if plantpicture and allowed_file(plantpicture.filename):
+                filename = secure_filename(plantpicture.filename)
+                filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+                plantpicture.save(filepath)  # Save the file
+                plantpicture_path = f"uploads/plants/{filename}"  # Store relative path
+
+            # Create a new plant record
             new_plant = Plant(
                 plantname=plantname,
                 waterrequirement=waterrequirement,
@@ -204,6 +286,7 @@ def addPlant():
                 plantlocation=plantlocation,
                 user_id=session["google_id"],
                 gmail=gmail,
+                plantpicture=plantpicture_path,  # Add the picture path
             )
 
             # Save the plant to the database
@@ -214,18 +297,15 @@ def addPlant():
             return redirect(url_for("plants"))
 
         except Exception as e:
-            # Log the error and notify the user
             app.logger.error(f"Error adding plant: {e}")
             flash("An error occurred while adding the plant.", "danger")
-            return redirect(url_for("index"))
+            return redirect(url_for("addPlant"))
     else:
-        # Render the add plant page on GET request
         return render_template("addPlant.html")
-        # return render_template("protected_area.html")
 
 
 # Plants page route
-@app.route("/plants", endpoint="plants")
+@app.route("/plants", methods=["GET"], endpoint="plants")
 @login_is_required
 def plants():
     try:
@@ -246,40 +326,37 @@ def plants():
         return "An error occurred while fetching the plants.", 500
 
 
-# buzzer sensor code down there
-def motion_detection():
-    data["alarm"] = False
-    while True:
-        if GPIO.input(PIR_pin):
-            print("Motion detected")
-            beep(4)
-            data["motion"] = 1
-        else:
-            data["motion"] = 0
-        if data["alarm"]:
-            beep(2)
-        time.sleep(1)
+@app.route(
+    "/delete_user/<string:user_id>", methods=["GET", "POST"], endpoint="delete_user"
+)
+@login_is_required
+def delete_user(user_id):
+    try:
+        if request.method == "GET":
+            return f"Delete user: {user_id}"
+        # Verify if the current user is an admin (based on some admin logic, e.g., a token or ID check)
+        if session["user_id"] != config.get("ADMIN_USER_ID"):
+            flash("You do not have permission to delete users.", "danger")
+            return redirect(url_for("admin_dashboard"))
 
+        # Fetch the user from the database
+        user = my_db.User.query.filter_by(user_id=user_id).first()
 
-@app.route("/keep_alive")
-def keep_alive():
-    global alive, data
-    alive += 1
-    keep_alive_count = str(alive)
-    data["keep_alive"] = keep_alive_count
-    parsed_json = json.dumps(data)
-    return str(parsed_json)
+        if not user:
+            flash("User not found.", "danger")
+            return redirect(url_for("admin_dashboard"))
 
+        # Delete the user
+        db.session.delete(user)
+        db.session.commit()
 
-@app.route("/status=<name>-<action>", methods=["POST"])
-def event(name, action):
-    global data
-    if name == "buzzer":
-        if action == "on":
-            data["alarm"] = True
-        elif action == "off":
-            data["alarm"] = False
-    return str("ok")
+        flash("User deleted successfully!", "success")
+        return redirect(url_for("admin_dashboard"))
+
+    except Exception as e:
+        app.logger.error(f"Error deleting user: {e}")
+        flash("An error occurred while deleting the user.", "danger")
+        return redirect(url_for("admin_dashboard"))
 
 
 if __name__ == "__main__":
