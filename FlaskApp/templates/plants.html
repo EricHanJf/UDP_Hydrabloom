@@ -13,54 +13,65 @@
         <div class="logo-container">
             <h1>HydraBloom</h1>
             <!-- Leaf Logo -->
-            <img src="images/image.jpg" alt="Leaf Logo">
+            <img src="{{ url_for('static', filename='images/image.jpg') }}" alt="Leaf Logo">
         </div>
         <nav>
             <ul>
                 <li><a href="{{ url_for('index') }}">Home</a></li>
                 <li><a href="{{ url_for('plants') }}">Plants</a></li>
                 <li><a href="{{ url_for('about') }}">About Us</a></li>
-                <li><a href="#">Vase</a></li>
+                <li><a href="{{ url_for('vase') }}">Vase</a></li>
+                {% if session.get("google_id") == google_admin_id %}
                 <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+                {% endif %}
                 <li>Hello, {{session["name"]}} <a href='/logout'><button>Logout</button></a></li>
-                <!-- <li>Hello {session["name"]}<a href='/logout'><button>Logout</button></a></li> -->
-                <!-- user name here and log out button -->
             </ul>
         </nav>
     </header>
-    <h1>Plants</h1>
+    <h1 class="plants-title">Plants</h1>
 
-    <div>
-        <a href="{{ url_for('addPlant') }}">Add a new plant</a>
+    <div class="add-plant-container">
+        <a class="add-plant-link-inaddplant" href="{{ url_for('addPlant') }}">Add a new plant</a>
     </div>
 
-    <h3>List of Plants</h3>
-    <table>
+    <h3 class="plants-list-title">List of Plants</h3>
+    <table class="plants-table">
         <thead>
             <tr>
-                <th>Plant Name</th>
-                <th>Water Requirement</th>
-                <th>Plant Type</th>
-                <th>Plant Location</th>
-                <th>Create Time</th>
-                <th>Gmail</th>
+                <th class="table-header">Plant Name</th>
+                <th class="table-header">Water Requirement</th>
+                <th class="table-header">Plant Type</th>
+                <th class="table-header">Plant Location</th>
+                <th class="table-header">Create Time</th>
+                <th class="table-header">Gmail</th>
+                <th class="table-header">Plant Picture</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="table-body">
             {% if plants %}
             {% for plant in plants %}
-            <tr>
-                <td>{{ plant.plantname }}</td>
-                <td>{{ plant.waterrequirement }}</td>
-                <td>{{ plant.planttype }}</td>
-                <td>{{ plant.plantlocation }}</td>
-                <td>{{ plant.create_time }}</td>
-                <td>{{ plant.gmail }}</td>
+            <tr class="table-row">
+                <td class="table-cell">{{ plant.plantname }}</td>
+                <td class="table-cell">{{ plant.waterrequirement }}</td>
+                <td class="table-cell">{{ plant.planttype }}</td>
+                <td class="table-cell">{{ plant.plantlocation }}</td>
+                <td class="table-cell">{{ plant.create_time }}</td>
+                <td class="table-cell">{{ plant.gmail }}</td>
+                <td class="table-cell">
+                    {% if plant.plantpicture %}
+                    <a class="image-link" href="{{ url_for('vase', plantpicture=plant.plantpicture) }}">
+                        <img class="plant-image" src="{{ url_for('static', filename=plant.plantpicture) }}"
+                            alt="{{ plant.plantname }}">
+                    </a>
+                    {% else %}
+                    <span>No picture available</span>
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
             {% else %}
-            <tr>
-                <td colspan="5">No plants found.</td>
+            <tr class="table-row">
+                <td colspan="7" class="no-plants">No plants found.</td>
             </tr>
             {% endif %}
         </tbody>
