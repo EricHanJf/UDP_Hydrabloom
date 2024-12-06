@@ -20,14 +20,14 @@
                 <li><a href="{{ url_for('index') }}">Home</a></li>
                 <li><a href="{{ url_for('plants') }}">Plants</a></li>
                 <li><a href="{{ url_for('about') }}">About Us</a></li>
-                <li><a href="#">Vase</a></li>
+                <li><a href="{{ url_for('vase') }}">Vase</a></li>
                 <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
-        <h1>Add a New Plant</h1>
+        <h1 class="addplant-title">Add a New Plant</h1>
         <form action="{{ url_for('addPlant') }}" method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="plantname">Plant Name:</label>
@@ -43,22 +43,50 @@
                     <option value="Monthly">Monthly</option>
                 </select>
             </div>
-
             <div class="form-group">
                 <label for="planttype">Plant Type:</label>
-                <input type="text" id="planttype" name="planttype" placeholder="e.g., Succulent, Herb, Tree" required>
+                <select id="planttype" name="planttype" required>
+                    <option value="Succulent">Succulent</option>
+                    <option value="Herb">Herb</option>
+                    <option value="Tree">Tree</option>
+                    <option value="Flower">Flower</option>
+                    <option value="Cactus">Cactus</option>
+                    <option value="Fern">Fern</option>
+                    <option value="Palm">Palm</option>
+                    <option value="Orchid">Orchid</option>
+                    <option value="Shrub">Shrub</option>
+                    <option value="Vine">Vine</option>
+                    <option value="Bonsai">Bonsai</option>
+                    <option value="Aquatic">Aquatic</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="plantlocation">Plant Location:</label>
+                <select id="plantlocation" name="plantlocation" required>
+                    <option value="Living Room">Living Room</option>
+                    <option value="Balcony">Balcony</option>
+                    <option value="Kitchen">Kitchen</option>
+                    <option value="Bedroom">Bedroom</option>
+                    <option value="Office">Office</option>
+                    <option value="Bathroom">Bathroom</option>
+                    <option value="Hallway">Hallway</option>
+                    <option value="Terrace">Terrace</option>
+                    <option value="Garden">Garden</option>
+                    <option value="Patio">Patio</option>
+                    <option value="Porch">Porch</option>
+                    <option value="Study Room">Study Room</option>
+                </select>
             </div>
 
             <div class="form-group">
-                <label for="plantlocation">Plant Location:</label>
-                <input type="text" id="plantlocation" name="plantlocation" placeholder="e.g., Living Room, Balcony"
-                    required>
+                <label for="gmail">Gmail:</label>
+                <input type="email" id="gmail" name="gmail" required>
             </div>
 
-            <!-- <div class="form-group">
+            <div class="form-group">
                 <label for="plantpicture">Plant Picture:</label>
                 <input type="file" id="plantpicture" name="plantpicture" accept="image/*">
-            </div> -->
+            </div>
 
             <button type="submit">Add Plant</button>
         </form>
