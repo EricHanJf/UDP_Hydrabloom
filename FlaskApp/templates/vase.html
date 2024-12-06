@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensors</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.8.2.8.js"></script>
+    <script src="static/js/main.js"></script>
+</head>
+
+<header>
+    <div class="logo-container">
+        <h1>HydraBloom</h1>
+        <!-- Leaf Logo -->
+        <!-- <img src="images/image.jpg" alt="Leaf Logo"> -->
+        <img src="{{ url_for('static', filename='images/image.jpg') }}" alt="Leaf Logo">
+    </div>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="{{ url_for('plants') }}">Plants</a></li>
+            <li><a href="{{ url_for('about') }}">About Us</a></li>
+            <li><a href="{{ url_for('vase') }}">Vase</a></li>
+            {% if session.get("google_id") == google_admin_id %}
+            <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+            {% endif %}
+            <li>Hello, {{session["name"]}} <a href='/logout'><button>Logout</button></a></li>
+        </ul>
+    </nav>
+</header>
+
+<body onload="setupPubNub();">
+    <h1>LED Control</h1>
+    <button id="ledOnButton" class="button">Turn ON LED</button>
+    <button id="ledOffButton" class="button">Turn OFF LED</button>
+    <p id="status">Status: LED is OFF</p>
+
+    {% if plantpicture %}
+    <img src="{{ url_for('static', filename=plantpicture) }}" alt="Selected Plant" style="width: 300px; height: auto;">
+    {% else %}
+    <p>No plant image available.</p>
+    {% endif %}
+
+</body>
+
+</html>
