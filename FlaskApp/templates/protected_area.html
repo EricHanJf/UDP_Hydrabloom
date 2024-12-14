@@ -19,12 +19,10 @@
         <ul>
             <li><a href="{{ url_for('index') }}">Home</a></li>
             <li><a href="{{ url_for('plants') }}">Plants</a></li>
-            <li><a href="{{ url_for('about') }}">About Us</a></li>
-            <li><a href="{{ url_for('vase') }}">Vase</a></li>
-            <!-- <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li> -->
             {% if session.get("google_id") == google_admin_id %}
             <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
             {% endif %}
+            <li><a href="{{ url_for('about') }}">About Us</a></li>
             <li>Hello, {{session["name"]}} <a href='/logout'><button>Logout</button></a></li>
         </ul>
     </nav>
@@ -32,19 +30,18 @@
 <!-- <p>Session Google ID: {{ session.get("google_id") }}</p>
 <p>Admin Google ID: {{ google_admin_id}}</p> -->
 
-<body onload="setupPubNub();updateTimeAndDayNight();">
-    <p class=welcome-user-message>Welcome to Hydrambloom, Hello {{session["name"]}}</p>
+<body onload="updateTimeAndDayNight();">
+    <p class=welcome-user-message>Welcome to Hydrabloom, Hello {{session["name"]}}</p>
     <span class="line-divider"></span>
     <div class="time-container">
         <h2>Current Time: <span id="currentTime"></span></h2>
         <h2>Currently: <span id="dayOrNight"></span></h2>
     </div>
 
-    <h1>Sensor Data</h1>
-
-    <p>Temperature: <span class="temperature"></span></p>
+    <!-- <h1>Sensor Data</h1> -->
+    <!-- <p>Temperature: <span class="temperature"></span></p>
     <p>Humidity: <span class="humidity"></span></p>
-    <p>Lux: <span class="lux"></span></p>
+    <p>Lux: <span class="lux"></span></p> -->
     <div class="link-container">
         <a class="add-plant-link" href="{{ url_for('addPlant') }}">+</a>
     </div>
