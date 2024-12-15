@@ -15,7 +15,7 @@
         <div class="logo-container">
             <h1>HydraBloom</h1>
             <!-- Leaf Logo -->
-            <img src="images/image.jpg" alt="Leaf Logo">
+            <img src="{{ url_for('static', filename='images/image.jpg') }}" alt="Leaf Logo">
         </div>
         <nav>
             <ul>
@@ -45,7 +45,8 @@
             </p>
         </div>
         <div class="plant-image">
-            <img src="images/plant.jpg" alt="Asplenium Houseplant">
+            <img src="{{ url_for('static', filename='images/PlantPotted.png') }}" alt="Asplenium Houseplant">
+            <!-- <img src="images/PlantPotted.png" alt="Asplenium Houseplant"> -->
             <p>Asplenium Houseplant</p>
         </div>
     </section>
