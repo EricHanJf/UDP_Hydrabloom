@@ -11,16 +11,15 @@
 <body>
     <header>
         <div class="logo-container">
-            <h1>HydraBloom</h1>
-            <!-- Leaf Logo -->
+            <h1><a href="{{ url_for('index') }}" style="text-decoration: none; color: inherit;">HydraBloom</a></h1>
             <img src="{{ url_for('static', filename='images/image.jpg') }}" alt="Leaf Logo">
         </div>
         <nav>
             <ul>
-                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('protected_area') }}">Home</a></li>
                 <li><a href="{{ url_for('plants') }}">Plants</a></li>
                 <li><a href="{{ url_for('about') }}">About Us</a></li>
-                <li><a href="{{ url_for('vase') }}">Vase</a></li>
+                <!-- <li><a href="{{ url_for('vase') }}">Vase</a></li> -->
                 {% if session.get("google_id") == google_admin_id %}
                 <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
                 {% endif %}
