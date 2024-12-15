@@ -13,15 +13,19 @@ from flask import (
     render_template,
     flash,
     url_for,
+    jsonify,
 )
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
 from .config import config
-from . import my_db
-from .my_db import Plant
+from . import my_db, pb
+from .my_db import Plant, dht22Data, tsl2561Data, SoilMoistureData
 from werkzeug.utils import secure_filename
+
+# for sensor database.
+from datetime import datetime, timedelta
 
 
 db = my_db.db
@@ -110,7 +114,7 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/protected_area")
+@app.route("/protected_area", endpoint="protected_area")
 @login_is_required
 def protected_area():
     print(session)
@@ -142,18 +146,80 @@ def signin():
     return render_template("signin.html")
 
 
-# vase page Route
-# @app.route("/vase", methods=["GET"], endpoint="vase")
-# @login_is_required
-# def vase():
-#     return render_template("vase.html")
-
-
 @app.route("/vase", methods=["GET"], endpoint="vase")
 @login_is_required
 def vase():
     plantpicture = request.args.get("plantpicture")
-    return render_template("vase.html", plantpicture=plantpicture)
+    plantname = request.args.get("plantname")
+    selected_date = request.args.get("date", datetime.utcnow().strftime("%Y-%m-%d"))
+
+    # Fetch data for the selected date
+    start_time = datetime.strptime(selected_date, "%Y-%m-%d")
+    end_time = start_time + timedelta(days=1)
+
+    dht_data = dht22Data.query.filter(
+        dht22Data.timestamp.between(start_time, end_time)
+    ).all()
+    tsl_data = tsl2561Data.query.filter(
+        tsl2561Data.timestamp.between(start_time, end_time)
+    ).all()
+    soil_moisture_data = SoilMoistureData.query.filter(
+        SoilMoistureData.timestamp.between(start_time, end_time)
+    ).all()
+
+    # Combine data by timestamp
+    combined_data = {}
+    for record in dht_data:
+        key = record.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+        combined_data[key] = {
+            "timestamp": record.timestamp,
+            "temperature": record.temperature,
+            "humidity": record.humidity,
+            "lux": None,
+            "soil_moisture": None,
+        }
+    for record in tsl_data:
+        key = record.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+        if key in combined_data:
+            combined_data[key]["lux"] = record.lux
+        else:
+            combined_data[key] = {
+                "timestamp": record.timestamp,
+                "temperature": None,
+                "humidity": None,
+                "lux": record.lux,
+                "soil_moisture": None,
+            }
+    for record in soil_moisture_data:
+        key = record.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+        if key in combined_data:
+            combined_data[key]["soil_moisture"] = record.soil_moisture
+        else:
+            combined_data[key] = {
+                "timestamp": record.timestamp,
+                "temperature": None,
+                "humidity": None,
+                "lux": None,
+                "soil_moisture": record.soil_moisture,
+            }
+
+    # Sort combined data by timestamp
+    combined_data = sorted(combined_data.values(), key=lambda x: x["timestamp"])
+
+    return render_template(
+        "vase.html",
+        plantpicture=plantpicture,
+        plantname=plantname,
+        combined_data=combined_data,
+        selected_date=selected_date,
+    )
+
+
+# pass google_admin_id Globally Using context_processor
+@app.context_processor
+def inject_admin_id():
+    google_admin_id = config.get("GOOGLE_ADMIN_ID")
+    return {"google_admin_id": google_admin_id}
 
 
 # admin_dashboard page Route
@@ -161,7 +227,7 @@ def vase():
 @login_is_required
 def admin_dashboard():
     try:
-        user_id = session.get("google_id")
+        user_id = session["google_id"]
         user_name = session.get("name")
         google_admin_id = config.get("GOOGLE_ADMIN_ID")
 
@@ -182,67 +248,6 @@ def admin_dashboard():
         return "An error occurred while loading the dashboard.", 500
 
 
-# UPLOAD_FOLDER = "static/uploads/plants"
-# ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
-# app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-# # app.config = config.get("UPLOAD_FOLDER")
-
-
-# def allowed_file(filename):
-#     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-# @app.route("/addPlant", methods=["GET","POST"], endpoint="addPlant")
-# @app.route("/addPlant", methods=["GET", "POST"], endpoint="addPlant")
-# @login_is_required
-# def addPlant():
-#     if request.method == "POST":
-#         try:
-#             # Retrieve form data
-#             plantname = request.form.get("plantname")
-#             waterrequirement = request.form.get("waterrequirement")
-#             planttype = request.form.get("planttype")
-#             plantlocation = request.form.get("plantlocation")
-#             gmail = request.form.get("gmail")
-
-#             # Validate required fields
-#             if (
-#                 not plantname
-#                 or not waterrequirement
-#                 or not planttype
-#                 or not plantlocation
-#                 or not gmail
-#             ):
-#                 flash("All fields are required.", "danger")
-#                 return redirect(url_for("index"))
-
-#             # Create a new plant record (without plantpicture)
-#             new_plant = Plant(
-#                 plantname=plantname,
-#                 waterrequirement=waterrequirement,
-#                 planttype=planttype,
-#                 plantlocation=plantlocation,
-#                 user_id=session["google_id"],
-#                 gmail=gmail,
-#             )
-
-#             # Save the plant to the database
-#             db.session.add(new_plant)
-#             db.session.commit()
-
-#             flash("Plant added successfully!", "success")
-#             return redirect(url_for("plants"))
-
-
-#         except Exception as e:
-#             # Log the error and notify the user
-#             app.logger.error(f"Error adding plant: {e}")
-#             flash("An error occurred while adding the plant.", "danger")
-#             return redirect(url_for("index"))
-#     else:
-#         # Render the add plant page on GET request
-#         return render_template("addPlant.html")
-#         # return render_template("protected_area.html")
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -357,6 +362,195 @@ def delete_user(user_id):
         app.logger.error(f"Error deleting user: {e}")
         flash("An error occurred while deleting the user.", "danger")
         return redirect(url_for("admin_dashboard"))
+
+
+@app.route("/api/store_dht22_data", methods=["POST"])
+def store_dht22_data():
+    data = request.get_json()
+
+    if "temperature" not in data or "humidity" not in data:
+        return jsonify({"error": "Missing temperature or humidity data"}), 400
+
+    # Store DHT22 data
+    new_data = dht22Data(temperature=data["temperature"], humidity=data["humidity"])
+
+    db.session.add(new_data)
+    db.session.commit()
+
+    return jsonify({"message": "DHT22 data stored successfully"}), 201
+
+
+@app.route("/api/store_tsl2561_data", methods=["POST"])
+def store_tsl2561_data():
+    data = request.get_json()
+
+    if "lux" not in data:
+        return jsonify({"error": "Missing lux data"}), 400
+
+    # Store TSL2561 data
+    new_data = tsl2561Data(lux=data["lux"])
+
+    db.session.add(new_data)
+    db.session.commit()
+
+    return jsonify({"message": "TSL2561 data stored successfully"}), 201
+
+
+@app.route("/api/store_soil_moisture_data", methods=["POST"])
+def store_soil_moisture_data():
+    data = request.get_json()
+
+    # Check if the soil moisture data is present
+    if "soilMoisture" not in data:
+        return jsonify({"error": "Missing soil moisture data"}), 400
+    try:
+        # Store Soil Moisture data
+        new_data = SoilMoistureData(  # Ensure this matches your SQLAlchemy model name
+            soil_moisture=data["soilMoisture"]  # Matches the key sent from the frontend
+        )
+
+        db.session.add(new_data)
+        db.session.commit()
+
+        return jsonify({"message": "Soil moisture data stored successfully"}), 201
+    except Exception as e:
+        return jsonify({"error": f"Failed to store data: {str(e)}"}), 500
+
+
+@app.route("/grant-<user_id>-<read>-<write>", methods=["POST"])
+def grant_access(user_id, read, write):
+    if session.get("google_id"):
+        if session["google_id"] == config.get("GOOGLE_ADMIN_ID"):
+            print(f"Admin granting {user_id}-{read}-{write}")
+            my_db.add_user_permission(user_id, read, write)
+            if read == "true" and write == "true":
+                token = pb.grant_read_and_write_access(user_id)
+                my_db.add_token(user_id, token)
+                access_response = {
+                    "token": token,
+                    "cipher_key": pb.cipher_key,
+                    "uuid": user_id,
+                }
+                return json.dumps(access_response)
+            elif read == True and write == True:
+                token = pb.grant_read_and_write_access(user_id)
+                my_db.add_token(user_id, token)
+                return token
+            elif read == "true" and write == "false":
+                token = pb.grant_read_access(user_id)
+                my_db.add_token(user_id, token)
+                access_response = {
+                    "token": token,
+                    "cipher_key": pb.cipher_key,
+                    "uuid": user_id,
+                }
+                return json.dumps(access_response)
+            elif read == "false" and write == "true":
+                token = pb.grant_write_access(user_id)
+                my_db.add_token(user_id, token)
+                access_response = {
+                    "token": token,
+                    "cipher_key": pb.cipher_key,
+                    "uuid": user_id,
+                }
+                return json.dumps(access_response)
+            else:
+                # Remove any existing token from the database
+                my_db.delete_revoked_token(user_id)
+                access_response = {
+                    "token": 1234,
+                    "cipher_key": pb.cipher_key,
+                    "uuid": user_id,
+                }
+                return json.dumps(access_response)
+        else:
+            print(f"Non admin attempting to grant privileges {user_id}-{read}-{write}")
+            my_db.add_user_permission(user_id, read, write)
+            token = my_db.get_token(user_id)
+            if token is not None:
+                timestamp, ttl, user_id, read, write = pb.parse_token(token)
+                current_time = time.time
+                if (timestamp + (ttl * 60)) - current_time > 0:
+                    print("Token is still valid")
+                    access_response = {
+                        "token": token,
+                        "cipher_key": pb.cipher_key,
+                        "uuid": user_id,
+                    }
+                    return json.dumps(access_response)
+                else:
+                    print("Token refresh needed")
+                    if read and write:
+                        token = pb.grant_read_write_access(user_id)
+                        my_db.add_token(user_id, token)
+                        access_response = {
+                            "token": token,
+                            "cipher_key": pb.cipher_key,
+                            "uuid": user_id,
+                        }
+                        return json.dumps(access_response)
+                    elif read:
+                        token = pb.grant_read_access(user_id)
+                        my_db.add_token(user_id, token)
+                        access_response = {
+                            "token": token,
+                            "cipher_key": pb.cipher_key,
+                            "uuid": user_id,
+                        }
+                        return json.dumps(access_response)
+                    elif read:
+                        token = pb.gran_write_access(user_id)
+                        my_db.add_token(user_id, token)
+                        access_response = {
+                            "token": token,
+                            "cipher_key": pb.cipher_key,
+                            "uuid": user_id,
+                        }
+                        return json.dumps(access_response)
+                    else:
+                        access_response = {
+                            "token": 123,
+                            "cipher_key": pb.cipher_key,
+                            "uuid": user_id,
+                        }
+                        return json.dumps(access_response)
+
+
+@app.route("/get_user_token", methods=["POST"])
+def get_user_token():
+    user_id = session["google_id"]
+    token = my_db.get_token(user_id)
+
+    if token is not None:
+        # Token found, return it
+        token_response = {"token": token, "cipher_key": pb.cipher_key, "uuid": user_id}
+    else:
+        # Token not found, generate a new one
+        token = pb.generate_new_token(user_id)  # Generate a new token
+        if token:
+            # Store the new token in the database
+            my_db.store_token(user_id, token)
+            # Return the new token with cipher key and user ID
+            token_response = {
+                "token": token,
+                "cipher_key": pb.cipher_key,
+                "uuid": user_id,
+            }
+        else:
+            # Handle the error if token generation fails
+            token_response = {"error": "Failed to generate token"}
+
+    return token_response
+
+
+def get_or_refresh_token(token):
+    timestamp, ttl, uuid, read, write = pb.parse_token(token)
+    current_time = time.time()
+    if (timestamp + (ttl * 60)) - current_time > 0:
+        return token
+    else:
+        # The token has expired
+        return grant_access(uuid, read, write)
 
 
 if __name__ == "__main__":
