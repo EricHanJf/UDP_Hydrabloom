@@ -5,25 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.8.2.8.js"></script>
+    <script src="static/js/admin.js"></script>
     <title>Admin Dashboard</title>
 </head>
 
-<body>
+<body onload="setupPubNub(); refresh_token();">
     <header>
         <div class="logo-container">
-            <h1>HydraBloom</h1>
-            <!-- Leaf Logo -->
+            <h1><a href="{{ url_for('index') }}" style="text-decoration: none; color: inherit;">HydraBloom</a></h1>
             <img src="{{ url_for('static', filename='images/image.jpg') }}" alt="Leaf Logo">
         </div>
         <nav>
             <ul>
-                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('protected_area') }}">Home</a></li>
                 <li><a href="{{ url_for('plants') }}">Plants</a></li>
-                <li><a href="{{ url_for('about') }}">About Us</a></li>
-                <li><a href="{{ url_for('vase') }}">Vase</a></li>
+                <!-- <li><a href="{{ url_for('vase') }}">Vase</a></li> -->
                 {% if session.get("google_id") == google_admin_id %}
                 <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
                 {% endif %}
+                <li><a href="{{ url_for('about') }}">About Us</a></li>
                 <li>Hello, {{session["name"]}} <a href='/logout'><button>Logout</button></a></li>
             </ul>
         </nav>
@@ -35,12 +36,12 @@
             {% for user in online_users["users"] %}
             <li>
                 <span>{{ user[0] }}</span>
-                <input type="checkbox" id="read-user-{{ user[1] }}" {% if user[2] %}checked{% endif %}>Read</input>
-                <input type="checkbox" id="write-user-{{ user[1] }}" {% if user[3] %}checked{% endif %}>Write</input>
+                <input type="checkbox" id="read-user-{{user[1]}}" {{user[2]}}>Read</input>
+                <input type="checkbox" id="write-user-{{user[1]}}" {{user[3]}}>Write</input>
                 <button id="access-user-{{ user[1] }}" onClick="grantAccess(this)">Grant Access</button>
                 <form action="{{ url_for('delete_user', user_id=user[1]) }}" method="post"
                     onsubmit="return confirm('Are you sure you want to delete this user?');">
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="submit" class="del-btn-small">Delete</button>
                 </form>
             </li>
             {% endfor %}
