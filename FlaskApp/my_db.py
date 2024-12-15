@@ -32,16 +32,62 @@ class Plant(db.Model):
     planttype = db.Column(db.String(100))  # Type of the plant
     plantlocation = db.Column(db.String(255))  # Location of the plant
     create_time = db.Column(db.DateTime, default=datetime.utcnow)  # Timestamp
-    plantpicture = db.Column(db.String(255))  # Path to the plant picture
+    user_id = db.Column(db.String(21), db.ForeignKey("user.user_id"))
+    gmail = db.Column(db.String(255))
+    plantpicture = db.Column(db.String(255))
+
+    # Relationship to the User table
+    user = db.relationship("User", backref="plants", lazy=True)
 
     def __init__(
-        self, plantname, waterrequirement, planttype, plantlocation, plantpicture=None
+        self,
+        plantname,
+        waterrequirement,
+        planttype,
+        plantlocation,
+        user_id,
+        gmail,
+        plantpicture=None,
     ):
         self.plantname = plantname
         self.waterrequirement = waterrequirement
         self.planttype = planttype
         self.plantlocation = plantlocation
+        self.user_id = user_id
+        self.gmail = gmail
         self.plantpicture = plantpicture
+
+
+# dht22Data table
+class dht22Data(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    temperature = db.Column(db.Float, nullable=False)
+    humidity = db.Column(db.Float, nullable=False)
+
+    def __init__(self, temperature, humidity):
+        self.temperature = temperature
+        self.humidity = humidity
+
+
+# tsl2561Data table
+class tsl2561Data(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    lux = db.Column(db.Float, nullable=False)
+
+    def __init__(self, lux):
+        self.lux = lux
+
+
+# SoilMoisture Data table
+class SoilMoistureData(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    soil_moisture = db.Column(db.Float, nullable=False)  # Soil moisture as a percentage
+
+    def __init__(self, soil_moisture):
+        self.soil_moisture = soil_moisture
 
 
 def delete_all():
@@ -138,4 +184,11 @@ def add_user_permission(user_id, read, write):
             row.write_access = 1
         elif write == "false":
             row.write_access = 0
+        db.session.commit()
+
+
+def delete_revoked_token(user_id):
+    row = get_user_row_if_exists(user_id)
+    if row is not False:
+        row.token = None
         db.session.commit()
