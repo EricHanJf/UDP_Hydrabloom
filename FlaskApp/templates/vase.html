@@ -12,17 +12,15 @@
 
 <header>
     <div class="logo-container">
-        <h1>HydraBloom</h1>
-        <!-- Leaf Logo -->
-        <!-- <img src="images/image.jpg" alt="Leaf Logo"> -->
+        <h1><a href="{{ url_for('index') }}" style="text-decoration: none; color: inherit;">HydraBloom</a></h1>
         <img src="{{ url_for('static', filename='images/image.jpg') }}" alt="Leaf Logo">
     </div>
     <nav>
         <ul>
-            <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="{{ url_for('protected_area') }}">Home</a></li>
             <li><a href="{{ url_for('plants') }}">Plants</a></li>
             <li><a href="{{ url_for('about') }}">About Us</a></li>
-            <li><a href="{{ url_for('vase') }}">Vase</a></li>
+            <!-- <li><a href="{{ url_for('vase') }}">Vase</a></li> -->
             {% if session.get("google_id") == google_admin_id %}
             <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
             {% endif %}
@@ -31,18 +29,87 @@
     </nav>
 </header>
 
-<body onload="setupPubNub();">
-    <h1>LED Control</h1>
-    <button id="ledOnButton" class="button">Turn ON LED</button>
-    <button id="ledOffButton" class="button">Turn OFF LED</button>
-    <p id="status">Status: LED is OFF</p>
+<body>
+    <div class="vase-header">
+        <a href="{{ url_for('plants') }}" class="back-button">Back</a>
+        <div class="plant-name-container">
+            {% if plantname %}
+            <h2 class="plant-name">{{ plantname }}</h2>
+            {% else %}
+            <p class="no-plant-name">No plant name available.</p>
+            {% endif %}
+        </div>
+    </div>
 
-    {% if plantpicture %}
-    <img src="{{ url_for('static', filename=plantpicture) }}" alt="Selected Plant" style="width: 300px; height: auto;">
-    {% else %}
-    <p>No plant image available.</p>
-    {% endif %}
+    <span class="line-divider"></span>
 
+    <div class="content-container">
+        <!-- LED Control Section -->
+        <div class="led-container">
+            <h1 class="led-control-header">LED Control</h1>
+            <button id="ledOnButton" class="button led-button">Turn ON LED</button>
+            <button id="ledOffButton" class="button led-button">Turn OFF LED</button>
+            <p id="status" class="status-text">Status: LED is OFF</p>
+        </div>
+
+        <!-- Live Sensor Data Section -->
+        <div class="SensorData-container">
+            <h3>Live Sensor Data</h3>
+            <p>Temperature: <span id="temperature_id"></span></p>
+            <p>Humidity: <span id="humidity_id"></span></p>
+            <p>Lux: <span id="lux_id"></span></p>
+            <p>Soil Moisture: <span id="soil_moisture_id"></span></p>
+        </div>
+        <!-- Plant Image Section -->
+        {% if plantpicture %}
+        <div class="plant-info-container">
+            <img class="plant-image-vase" src="{{ url_for('static', filename=plantpicture) }}" alt="Selected Plant">
+        </div>
+        {% else %}
+        <p class="no-plant-image">No plant image available.</p>
+        {% endif %}
+
+        <!-- Historical Data Section -->
+        <div class="historical-data-container">
+            <!-- Calendar Input for Selecting Date -->
+            <form method="GET" action="{{ url_for('vase') }}">
+                <label for="date">Select Date:</label>
+                <input type="date" id="date" name="date" value="{{ selected_date }}">
+
+                <!-- Hidden inputs to keep plant information -->
+                <input type="hidden" name="plantname" value="{{ plantname }}">
+                <input type="hidden" name="plantpicture" value="{{ plantpicture }}">
+
+                <input type="submit" value="Filter">
+            </form>
+
+            <!-- Table to Display Sensor Data -->
+            <h3>Historical Sensor Data for {{ selected_date }}</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Temperature (&#8451;)</th>
+                        <th>Humidity (%)</th>
+                        <th>Lux</th>
+                        <th>Soil Moisture (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in combined_data %}
+                    <tr>
+                        <td>{{ record.timestamp }}</td>
+                        <td>{{ record.temperature if record.temperature is not none else '-' }}</td>
+                        <td>{{ record.humidity if record.humidity is not none else '-' }}</td>
+                        <td>{{ record.lux if record.lux is not none else '-' }}</td>
+                        <td>{{ record.soil_moisture if record.soil_moisture is not none else '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </body>
+
 
 </html>
