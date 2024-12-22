@@ -152,6 +152,7 @@ def vase():
     plantpicture = request.args.get("plantpicture")
     plantname = request.args.get("plantname")
     selected_date = request.args.get("date", datetime.utcnow().strftime("%Y-%m-%d"))
+    today_date = datetime.utcnow().strftime("%Y-%m-%d")
 
     # Fetch data for the selected date
     start_time = datetime.strptime(selected_date, "%Y-%m-%d")
@@ -212,6 +213,7 @@ def vase():
         plantname=plantname,
         combined_data=combined_data,
         selected_date=selected_date,
+        today_date=today_date,
     )
 
 
@@ -458,7 +460,7 @@ def grant_access(user_id, read, write):
                 # Remove any existing token from the database
                 my_db.delete_revoked_token(user_id)
                 access_response = {
-                    "token": 1234,
+                    "token": 123,
                     "cipher_key": pb.cipher_key,
                     "uuid": user_id,
                 }
@@ -520,26 +522,11 @@ def grant_access(user_id, read, write):
 def get_user_token():
     user_id = session["google_id"]
     token = my_db.get_token(user_id)
-
     if token is not None:
-        # Token found, return it
+        token = get_or_refresh_token(token)
         token_response = {"token": token, "cipher_key": pb.cipher_key, "uuid": user_id}
     else:
-        # Token not found, generate a new one
-        token = pb.generate_new_token(user_id)  # Generate a new token
-        if token:
-            # Store the new token in the database
-            my_db.store_token(user_id, token)
-            # Return the new token with cipher key and user ID
-            token_response = {
-                "token": token,
-                "cipher_key": pb.cipher_key,
-                "uuid": user_id,
-            }
-        else:
-            # Handle the error if token generation fails
-            token_response = {"error": "Failed to generate token"}
-
+        token_response = {"token": 123, "cipher_key": pb.cipher_key, "uuid": user_id}
     return token_response
 
 
