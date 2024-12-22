@@ -29,6 +29,12 @@
             </ul>
         </nav>
     </header>
+    <script>
+        // Pass the user_id from Flask to JavaScript
+        const user_Id = "{{ user_id }}";  // This will be populated by Flask with the actual user_id
+        console.log("User ID from Flask:", user_Id);  // You can use this in your JS code
+    </script>
+
     <div>
         {% if user_id == google_admin_id %}
         <h2>Logged in Users</h2>

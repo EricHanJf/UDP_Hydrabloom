@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sensors</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.8.2.8.js"></script>
     <script src="static/js/main.js"></script>
 </head>
@@ -50,16 +51,40 @@
             <button id="ledOnButton" class="button led-button">Turn ON LED</button>
             <button id="ledOffButton" class="button led-button">Turn OFF LED</button>
             <p id="status" class="status-text">Status: LED is OFF</p>
-        </div>
 
+            <h1 class="led-control-header">Pump Control</h1>
+            <input id="pumpDurationInput" type="number" placeholder="Duration in seconds" class="input-field" min="1">
+            <button id="pumpOnButton" class="button led-button">Turn ON Pump</button>
+            <button id="pumpOffButton" class="button led-button">Turn OFF Pump</button>
+            <p id="pumpStatus" class="status-text">Status: Pump is OFF</p>
+        </div>
         <!-- Live Sensor Data Section -->
         <div class="SensorData-container">
             <h3>Live Sensor Data</h3>
-            <p>Temperature: <span id="temperature_id"></span></p>
-            <p>Humidity: <span id="humidity_id"></span></p>
-            <p>Lux: <span id="lux_id"></span></p>
-            <p>Soil Moisture: <span id="soil_moisture_id"></span></p>
+            <div class="sensor-grid">
+                <div class="sensor-item">
+                    <span class="material-icons icon">thermostat</span>
+                    <p>Temperature:</p>
+                    <span id="temperature_id"></span>
+                </div>
+                <div class="sensor-item">
+                    <span class="material-icons icon">water_drop</span>
+                    <p>Humidity:</p>
+                    <span id="humidity_id"></span>
+                </div>
+                <div class="sensor-item">
+                    <span class="material-icons icon">wb_sunny</span>
+                    <p>Lux:</p>
+                    <span id="lux_id"></span>
+                </div>
+                <div class="sensor-item">
+                    <span class="material-icons icon">grass</span>
+                    <p>Soil Moisture:</p>
+                    <span id="soil_moisture_id"></span>
+                </div>
+            </div>
         </div>
+
         <!-- Plant Image Section -->
         {% if plantpicture %}
         <div class="plant-info-container">
@@ -68,47 +93,56 @@
         {% else %}
         <p class="no-plant-image">No plant image available.</p>
         {% endif %}
+    </div>
 
-        <!-- Historical Data Section -->
-        <div class="historical-data-container">
-            <!-- Calendar Input for Selecting Date -->
-            <form method="GET" action="{{ url_for('vase') }}">
-                <label for="date">Select Date:</label>
-                <input type="date" id="date" name="date" value="{{ selected_date }}">
+    <span class="line-divider"></span>
 
-                <!-- Hidden inputs to keep plant information -->
-                <input type="hidden" name="plantname" value="{{ plantname }}">
-                <input type="hidden" name="plantpicture" value="{{ plantpicture }}">
+    <!-- Historical Data Section -->
+    <div class="historical-data-container">
+        <!-- Calendar Input for Selecting Date -->
+        <form method="GET" action="{{ url_for('vase') }}">
+            <label for="date">Select Date:</label>
+            <input type="date" id="date" name="date" value="{{ selected_date }}" max="{{ today_date }}" required>
 
-                <input type="submit" value="Filter">
-            </form>
+            <!-- Hidden inputs to keep plant information -->
+            <input type="hidden" name="plantname" value="{{ plantname }}">
+            <input type="hidden" name="plantpicture" value="{{ plantpicture }}">
 
-            <!-- Table to Display Sensor Data -->
+            <input type="submit" value="Filter">
+        </form>
+
+        <!-- Table to Display Sensor Data -->
+        <div class="sensor-data-container">
             <h3>Historical Sensor Data for {{ selected_date }}</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Timestamp</th>
-                        <th>Temperature (&#8451;)</th>
-                        <th>Humidity (%)</th>
-                        <th>Lux</th>
-                        <th>Soil Moisture (%)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for record in combined_data %}
-                    <tr>
-                        <td>{{ record.timestamp }}</td>
-                        <td>{{ record.temperature if record.temperature is not none else '-' }}</td>
-                        <td>{{ record.humidity if record.humidity is not none else '-' }}</td>
-                        <td>{{ record.lux if record.lux is not none else '-' }}</td>
-                        <td>{{ record.soil_moisture if record.soil_moisture is not none else '-' }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="timestamp-column">Timestamp</th>
+                            <th class="temperature-column">Temperature (&#8451;)</th>
+                            <th class="humidity-column">Humidity (%)</th>
+                            <th class="lux-column">Lux</th>
+                            <th class="soil-moisture-column">Soil Moisture (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in combined_data %}
+                        <tr class="data-row">
+                            <td class="timestamp">{{ record.timestamp }}</td>
+                            <td class="temperature">{{ record.temperature if record.temperature is not none else '-' }}
+                            </td>
+                            <td class="humidity">{{ record.humidity if record.humidity is not none else '-' }}</td>
+                            <td class="lux">{{ record.lux if record.lux is not none else '-' }}</td>
+                            <td class="soil-moisture">{{ record.soil_moisture if record.soil_moisture is not none else
+                                '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+
 </body>
 
 

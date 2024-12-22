@@ -12,7 +12,7 @@
 
 <header>
     <div class="logo-container">
-        <h1>HydraBloom</h1>
+        <h1><a href="{{ url_for('index') }}" style="text-decoration: none; color: inherit;">HydraBloom</a></h1>
         <img src="{{ url_for('static', filename='images/image.jpg') }}" alt="Leaf Logo">
     </div>
     <nav>
@@ -37,11 +37,6 @@
         <h2>Current Time: <span id="currentTime"></span></h2>
         <h2>Currently: <span id="dayOrNight"></span></h2>
     </div>
-
-    <!-- <h1>Sensor Data</h1> -->
-    <!-- <p>Temperature: <span class="temperature"></span></p>
-    <p>Humidity: <span class="humidity"></span></p>
-    <p>Lux: <span class="lux"></span></p> -->
     <div class="link-container">
         <a class="add-plant-link" href="{{ url_for('addPlant') }}">+</a>
     </div>
